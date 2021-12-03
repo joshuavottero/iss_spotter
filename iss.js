@@ -26,7 +26,7 @@ const fetchMyIP = function(callback) {
 };
 
 const fetchCoordsByIP = function(ip, callback) {
-  console.log(ip);
+  
   const url = `https://api.freegeoip.app/json/${ip}?apikey=4fd75430-53c2-11ec-9fea-6195bd3ac7aa`;
   request(url, (error, Response, body) => {
     if (error !== null) {
@@ -40,8 +40,7 @@ const fetchCoordsByIP = function(ip, callback) {
     }
     const Htmlbody = JSON.parse(body);
     let coords = {};
-    console.log(error);
-    console.log(Htmlbody);
+    //console.log(Htmlbody);
     if (Htmlbody["latitude"] && Htmlbody["longitude"]) {
       coords["latitude"] = Htmlbody["latitude"];
       coords["longitude"] = Htmlbody["longitude"];
@@ -76,9 +75,29 @@ const fetchISSFlyOverTimes = function(coords, callback) {
   });
 };
 
+const nextISSTimesForMyLocation = function(callback) {
+  fetchMyIP((error, ip) => {
+    if (error) {
+      return callback(error, null);
+    }
+    fetchCoordsByIP(ip, (error, corrds) => {
+      if (error) {
+        return callback(error, null);
+      }
+      fetchISSFlyOverTimes(corrds, (error, times) =>{
+        if (error) {
+          return callback(error, null);
+        }
+        callback(null, times);
+
+      });
+    });
+  });
+};
 
 
 
 
 
-module.exports = { fetchMyIP, fetchCoordsByIP, fetchISSFlyOverTimes };
+
+module.exports = { fetchMyIP, fetchCoordsByIP, fetchISSFlyOverTimes, nextISSTimesForMyLocation };
